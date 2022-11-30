@@ -1,5 +1,6 @@
 #include <iostream>
 #include "BST.h"
+#include "AVLTree.h"
 
 using namespace std;
 
