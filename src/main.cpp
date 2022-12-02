@@ -3,6 +3,7 @@
 #include <set>
 #include <vector>
 #include <chrono>
+#include <algorithm>
 #include "BST.h"
 #include "AVLTree.h"
 
@@ -100,9 +101,22 @@ void insertsFindsAndRemoves(vector<int> randNums) {
     cout << "The AVL tree was " << (float)BSTduration.count() / (float)AVLduration.count() << " times faster than the BST for inserts, finds, and removes." << endl << endl;
 }
 
+vector<int> getUniques(vector<int> vec)
+{
+    vector<int> uniques;
+    for (int num : vec)
+    {
+        if (std::find(uniques.begin(), uniques.end(), num) == uniques.end()) {
+            uniques.push_back(num);
+        }
+    }
+
+    return uniques;
+}
+
 int main(int argc, char* argv[]){
     srand(time(0));
-    set<int> randNumsSet;
+    vector<int> allRandNums;
     vector<int> randNums;
     vector<int> inOrder;
     BST bst;
@@ -110,17 +124,18 @@ int main(int argc, char* argv[]){
     int numberOfRandoms = 20000;
 
     for (auto i = 0; i < numberOfRandoms; i++) {
-        randNumsSet.insert((rand() % 1000000) + 1);
+        allRandNums.push_back((rand() % 1000000) + 1);
         inOrder.push_back(i);
     }
-    std::copy(randNumsSet.begin(), randNumsSet.end(), std::back_inserter(randNums));
-
+    randNums = getUniques(allRandNums);
     
+    /*
     insertsOnly(randNums);
     insertsAndFinds(randNums);
     insertsAndRemoves(randNums);
     insertsFindsAndRemoves(randNums);
-    
+    */
+
     /*
     insertsOnly(inOrder);
     insertsAndFinds(inOrder);
