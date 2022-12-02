@@ -180,6 +180,7 @@ class AVLTree : SearchTree{
 
         void remove(int key){
             auto node = find(key);
+            if(node==nullptr) return;
             remove(node);
         }
         void remove(Node* node){
