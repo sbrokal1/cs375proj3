@@ -3,7 +3,7 @@
 #include <iostream>
 #include "SearchTree.h"
 
-class BST : SearchTree {
+class BST : public SearchTree {
 	private:
 		Node* root;
 		

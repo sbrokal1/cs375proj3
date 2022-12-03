@@ -6,7 +6,7 @@ using namespace std;
 #include <iostream>
 #include "SearchTree.h"
 
-class AVLTree : SearchTree{
+class AVLTree : public SearchTree{
     private:
         Node* root;
         void destroyRecursive(Node* node){
@@ -140,27 +140,38 @@ class AVLTree : SearchTree{
                 return t;
             
             t->height = (getHeight(t->left)>getHeight(t->right) ? getHeight(t->left) : getHeight(t->right))+1;
-
+            // printBT();
+            // cout<<"t: "<<t->key<<endl;
             // If node is unbalanced
             // If left node is deleted, right case
             if(getHeight(t->left) - getHeight(t->right) == 2)
             {
                 // right right case
-                if(getHeight(t->left->left) - getHeight(t->left->right) == 1)
-                    return leftRotate(t);
+                if(getHeight(t->left->left) - getHeight(t->left->right) == 1){
+                   
+                    return rightRotate(t);
+                }
                 // right left case
-                else
-                    return RLRotate(t);
+                else{
+
+                    
+                    return LRRotate(t);
+                }
             }
             // If right node is deleted, left case
             else if(getHeight(t->right) - getHeight(t->left) == 2)
             {
                 // left left case
-                if(getHeight(t->right->right) - getHeight(t->right->left) == 1)
-                    return rightRotate(t);
+                if(getHeight(t->right->right) - getHeight(t->right->left) == 1){
+                    
+                    return leftRotate(t);
+
+                }
                 // left right case
-                else
-                    return LRRotate(t);
+                else{
+                    
+                    return RLRotate(t);
+                }
             }
             return t;
         }
@@ -191,7 +202,17 @@ class AVLTree : SearchTree{
         
 
         Node* find(int key){
-            return find(key,root);
+            Node* currNode = root; 
+			while(currNode != nullptr){
+				if(key < currNode->key){
+					currNode = currNode->left;
+				}else if(key > currNode->key){
+					currNode = currNode->right;
+				}else{ //currNode->key == key
+					return currNode;
+				}
+			}
+			return currNode;
         }
 
         void remove(int key){

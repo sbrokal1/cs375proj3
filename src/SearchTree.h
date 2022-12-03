@@ -1,5 +1,6 @@
 #pragma once
 #include <chrono>
+#include <iostream>
 
 using namespace std;
 
@@ -46,9 +47,9 @@ class SearchTree {
 		};
 
         /* Functions that must be implemented in Search Tree implementations */
-        void insert(int data);
-        Node* find(int key);
-        void remove(int key);
+        virtual void insert(int data){cout<<"NOT IMPLEMENTED"<<endl;}
+        virtual Node* find(int key){cout<<"NOT IMPLEMENTED"<<endl;return 0;}
+        virtual void remove(int key){cout<<"NOT IMPLEMENTED"<<endl;}
 
 
         /* Timer functions */
