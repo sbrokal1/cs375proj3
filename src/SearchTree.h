@@ -15,12 +15,14 @@ class SearchTree {
 					right = nullptr;
 					parent = nullptr;
 					key = data;
+					height = 0;
 				}
 				
 				Node* left;		// node left child 
 				Node* right;	// right child
 				Node* parent;	// parent
 				int key;		// key/data
+				int height;
 
 				Node* getSuccessor(){
 					Node* currNode = this->right;

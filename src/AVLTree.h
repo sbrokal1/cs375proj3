@@ -22,88 +22,161 @@ class AVLTree : SearchTree{
 		}
         
         int getHeight(Node* node){
-            int c = 0;
-            if(node!=nullptr){
-                auto hl = getHeight(node->left);
-                auto hr = getHeight(node->right);
-                c = max(hl,hr)+1;
-            }
-            return c;
+            if(node!=nullptr) return node->height;
+            return -1;
         }
 
         int getBF(Node* node){
             if(node==nullptr) return 0;
             return getHeight(node->left)-getHeight(node->right);
         }
-        void leftRotate(Node* node){
-            auto x = node;
-            auto a = node->left;
-            auto y = x->right;
-            auto b = y->left;
-            auto Y = y->right;
-            auto p = node->parent;
-            
-            y->left = nullptr;
-            x->right = b;
-            y->parent = nullptr;
-            if(b!=nullptr){
-                b->parent = x;
+        Node* leftRotate(Node* t){
+            Node* u = t->right;
+            t->right = u->left;
+            u->left = t;
+            t->height = (getBF(t)>0 ? getHeight(t->left) : getHeight(t->right))+1;
+            if(getHeight(t->right)>t->height){
+                u->height = getHeight(t->right)+1;
+            }else{
+                u->height = t->height+1;
             }
-
-
-            if(p==nullptr) {
-                root = y;
-                y->parent = nullptr;
-            }
-            else if(x==p->right) {
-                p->right = y;
-                y->parent = nullptr;
-                y->parent = p;
-            }
-            else {
-                p->left = y;
-                x->parent = nullptr;
-                y->parent = p;
-            }
-
-            y->left = x;
-            x->parent = y;
+            return u;
         }
 
-        void rightRotate(Node* node){
-            auto y = node;
-            auto a = node->right;
-            auto x = y->left;
-            auto b = x->right;
-            auto Y = x->left;
-            auto p = node->parent;
-            
-            x->right = nullptr;
-            y->left = b;
-            x->parent = nullptr;
-            if(b!=nullptr){
-                b->parent = y;
-            }
-
-
-            if(p==nullptr) {
-                root = x;
-                x->parent = nullptr;
-            }
-            else if(y==p->right) {
-                p->right = x;
-                y->parent = nullptr;
-                x->parent = p;
-            }
-            else {
-                p->left = x;
-                y->parent = nullptr;
-                x->parent = p;
-            }
-
-            x->right = y;
-            y->parent = x;
+         Node* RLRotate(Node* t)
+        {
+            t->right = rightRotate(t->right);
+            return leftRotate(t);
         }
+
+        Node* LRRotate(Node* t)
+        {
+            t->left = leftRotate(t->left);
+            return rightRotate(t);
+        }
+
+        Node* rightRotate(Node* t){
+            Node* u = t->left;
+            t->left = u->right;
+            u->right = t;
+            t->height = (getBF(t)>0 ? getHeight(t->left) : getHeight(t->right))+1;
+            if(getHeight(u->left)>t->height){
+                u->height = getHeight(u->left)+1;
+            }else{
+                u->height = t->height+1;
+            }
+            return u;
+        }
+
+
+        Node* insert(int x, Node* t){
+            if(t==nullptr){
+                t = new Node(x);
+            }else if(x<t->key){
+                t->left = insert(x,t->left);
+                if(getBF(t) == 2)
+                {
+                    if(x < t->left->key)
+                        t = rightRotate(t);
+                    else
+                        t = LRRotate(t);
+                }
+            }else if(x>t->key){
+                t->right = insert(x,t->right);
+                if(-getBF(t) == 2)
+                {
+                    if(x > t->right->key)
+                        t = leftRotate(t);
+                    else
+                        t = RLRotate(t);
+                }
+            }
+            t->height = (getBF(t)>0 ? getHeight(t->left) : getHeight(t->right))+1;
+            return t;
+        }
+
+        Node* findMin(Node* t)
+    {
+        if(t == nullptr)
+            return nullptr;
+        else if(t->left == nullptr)
+            return t;
+        else
+            return findMin(t->left);
+    }
+
+        Node* remove(int x, Node* t)
+        {
+            Node* temp;
+            // Element not found
+            if(t == nullptr)
+                return nullptr;
+
+            // Searching for element
+            else if(x < t->key)
+                t->left = remove(x, t->left);
+            else if(x > t->key)
+                t->right = remove(x, t->right);
+
+            // Element found
+            // With 2 children
+            else if(t->left && t->right)
+            {
+                temp = findMin(t->right);
+                t->key = temp->key;
+                t->right = remove(t->key, t->right);
+            }
+            // With one or zero child
+            else
+            {
+                temp = t;
+                if(t->left == nullptr)
+                    t = t->right;
+                else if(t->right == nullptr)
+                    t = t->left;
+                delete temp;
+            }
+            if(t == nullptr)
+                return t;
+            
+            t->height = (getHeight(t->left)>getHeight(t->right) ? getHeight(t->left) : getHeight(t->right))+1;
+
+            // If node is unbalanced
+            // If left node is deleted, right case
+            if(getHeight(t->left) - getHeight(t->right) == 2)
+            {
+                // right right case
+                if(getHeight(t->left->left) - getHeight(t->left->right) == 1)
+                    return leftRotate(t);
+                // right left case
+                else
+                    return RLRotate(t);
+            }
+            // If right node is deleted, left case
+            else if(getHeight(t->right) - getHeight(t->left) == 2)
+            {
+                // left left case
+                if(getHeight(t->right->right) - getHeight(t->right->left) == 1)
+                    return rightRotate(t);
+                // left right case
+                else
+                    return LRRotate(t);
+            }
+            return t;
+        }
+
+
+        Node* find(int key, Node* t){
+            if(t==nullptr) return nullptr;
+            if(t->key==key) return t;
+
+            auto lsearch = find(key,t->left);
+            auto rsearch = find(key,t->right);
+            if(lsearch!=nullptr) return lsearch;
+            if(rsearch!=nullptr) return rsearch;
+            return nullptr;
+        }
+
     public:
         AVLTree(){
             root = nullptr;
@@ -113,135 +186,18 @@ class AVLTree : SearchTree{
 		}
 
         void insert(int data){
-            if(root==nullptr){
-                root = new Node(data);
-                return;
-            }
-            auto p = root;
-            for(;;){
-                if(data<p->key){
-                    // Move down left
-                    if(p->left!=nullptr){
-                        p = p->left;
-                    }else{
-                        break;
-                    }
-                }else{
-                    // Move down right
-                    if(p->right!=nullptr){
-                        p = p->right;
-                    }else{
-                        break;
-                    }
-                }
-            }
-            if(data<p->key){
-                // Insert left
-                p->left = new Node(data);
-                p->left->parent = p;
-                
-            }else{
-                // Insert right
-                p->right = new Node(data);
-                p->right->parent = p;
-            }
-
-            p=p->parent;
-            int bf = getBF(p);
-            if(bf>1){
-                if(data<p->left->key){
-                    rightRotate(p);
-                }else{
-                    leftRotate(p->left);
-                    rightRotate(p);
-                }
-            }else if(bf < -1){
-                if(data>p->right->key){
-                    leftRotate(p);
-                }else{
-                    rightRotate(p->right);
-                    leftRotate(p);
-                }
-            }
-            
-
+            root = insert(data,root);
         }
+        
+
         Node* find(int key){
-            auto p = root;
-            while(p!=nullptr && p->key!=key){
-                if(key<p->key){
-                    p = p->left;
-                }else{
-                    p = p->right;
-                }
-            }
-            return p;
+            return find(key,root);
         }
 
         void remove(int key){
-            auto node = find(key);
-            if(node==nullptr) return;
-            remove(node);
+            root = remove(key,root);
         }
-        void remove(Node* node){
-            
-            auto p = node->parent;
-            
-            auto isLeft = p ? node==p->left : 0;
-            if(node->left==nullptr && node->right==nullptr){ // No children
-                if(p==nullptr){
-                    root=nullptr;
-                    return;
-                }
-                if(isLeft) p->left = nullptr;
-                else p->right = nullptr;
-            }else{
-                if(node->left!=nullptr && node->right!=nullptr){ // Two children
-                    auto succ = node->getSuccessor();
-                    node->key = succ->key;
-                    remove(succ);
-                    if(p==nullptr) return;
-                    
-                }else{ // One child
-                    auto child = node->left==nullptr ? node->right : node->left;
-                    if(p==nullptr){
-                        root = child;
-                        child->parent = nullptr;
-                        return;
-                    }
-                    if(node==p->right) p->right = child;
-                    if(node==p->left) p->left = child;
-                    child->parent = p;
-                }
-            }
-            
-
-            node = isLeft ? p->left : p->right;
-
-
-            
-            auto bf = getBF(node);
-            
-            if(bf>1){
-                if(getBF(node->left)>=0){
-                    rightRotate(node);
-                }else{
-                    leftRotate(node->left);
-                    rightRotate(node);
-                }
-            }else if(bf<-1){
-                if(getBF(node->right)<=0){
-                    leftRotate(node);
-                }else{
-                    rightRotate(node->right);
-                    leftRotate(node);
-                }
-            }
-
-
-
-        }
-
+        
         void printBT(const std::string& prefix, Node* node, bool isLeft)
         {
             if( node != nullptr )
@@ -251,7 +207,7 @@ class AVLTree : SearchTree{
                 std::cout << (isLeft ? "├──" : "└──" );
 
                 // print the value of the node
-                std::cout << node->key << std::endl;
+                std::cout << node->key<<"::"<<node->height << std::endl;
                 // std::cout << getBF(node) << std::endl;
 
                 // enter the next tree level - left and right branch
