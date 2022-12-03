@@ -6,244 +6,262 @@ using namespace std;
 #include <iostream>
 #include "SearchTree.h"
 
-class AVLTree : public SearchTree{
-    private:
-        Node* root;
-        void destroyRecursive(Node* node){
-			if(node != nullptr){
-				if(node->left != nullptr){
-					destroyRecursive(node->left);
-				}
-				if(node->right != nullptr){
-					destroyRecursive(node->right);
-				}
-				delete node;
-			}
-		}
-        
-        int getHeight(Node* node){
-            if(node!=nullptr) return node->height;
-            return -1;
-        }
-
-        int getBF(Node* node){
-            if(node==nullptr) return 0;
-            return getHeight(node->left)-getHeight(node->right);
-        }
-        Node* leftRotate(Node* t){
-            Node* u = t->right;
-            t->right = u->left;
-            u->left = t;
-            t->height = (getBF(t)>0 ? getHeight(t->left) : getHeight(t->right))+1;
-            if(getHeight(t->right)>t->height){
-                u->height = getHeight(t->right)+1;
-            }else{
-                u->height = t->height+1;
-            }
-            return u;
-        }
-
-         Node* RLRotate(Node* t)
-        {
-            t->right = rightRotate(t->right);
-            return leftRotate(t);
-        }
-
-        Node* LRRotate(Node* t)
-        {
-            t->left = leftRotate(t->left);
-            return rightRotate(t);
-        }
-
-        Node* rightRotate(Node* t){
-            Node* u = t->left;
-            t->left = u->right;
-            u->right = t;
-            t->height = (getBF(t)>0 ? getHeight(t->left) : getHeight(t->right))+1;
-            if(getHeight(u->left)>t->height){
-                u->height = getHeight(u->left)+1;
-            }else{
-                u->height = t->height+1;
-            }
-            return u;
-        }
-
-
-        Node* insert(int x, Node* t){
-            if(t==nullptr){
-                t = new Node(x);
-            }else if(x<t->key){
-                t->left = insert(x,t->left);
-                if(getBF(t) == 2)
-                {
-                    if(x < t->left->key)
-                        t = rightRotate(t);
-                    else
-                        t = LRRotate(t);
-                }
-            }else if(x>t->key){
-                t->right = insert(x,t->right);
-                if(-getBF(t) == 2)
-                {
-                    if(x > t->right->key)
-                        t = leftRotate(t);
-                    else
-                        t = RLRotate(t);
-                }
-            }
-            t->height = (getBF(t)>0 ? getHeight(t->left) : getHeight(t->right))+1;
-            return t;
-        }
-
-        Node* findMin(Node* t)
+class AVLTree : public SearchTree
+{
+private:
+    Node *root;
+    void destroyRecursive(Node *node)
     {
-        if(t == nullptr)
-            return nullptr;
-        else if(t->left == nullptr)
-            return t;
-        else
-            return findMin(t->left);
+        if (node != nullptr)
+        {
+            if (node->left != nullptr)
+            {
+                destroyRecursive(node->left);
+            }
+            if (node->right != nullptr)
+            {
+                destroyRecursive(node->right);
+            }
+            delete node;
+        }
     }
 
-        Node* remove(int x, Node* t)
+    int getHeight(Node *node)
+    {
+        if (node != nullptr)
+            return node->height;
+        return -1;
+    }
+
+    int getBF(Node *node)
+    {
+        if (node == nullptr)
+            return 0;
+        return getHeight(node->left) - getHeight(node->right);
+    }
+
+    Node *leftRotate(Node *node)
+    {
+        Node *y = node->right;
+        node->right = y->left;
+        y->left = node;
+        node->height = (getBF(node) > 0 ? getHeight(node->left) : getHeight(node->right)) + 1;
+        if (getHeight(node->right) > node->height)
         {
-            Node* temp;
-            // Element not found
-            if(t == nullptr)
-                return nullptr;
+            y->height = getHeight(node->right) + 1;
+        }
+        else
+        {
+            y->height = node->height + 1;
+        }
+        return y;
+    }
 
-            // Searching for element
-            else if(x < t->key)
-                t->left = remove(x, t->left);
-            else if(x > t->key)
-                t->right = remove(x, t->right);
+    Node *RLRotate(Node *t)
+    {
+        t->right = rightRotate(t->right);
+        return leftRotate(t);
+    }
 
-            // Element found
-            // With 2 children
-            else if(t->left && t->right)
+    Node *LRRotate(Node *t)
+    {
+        t->left = leftRotate(t->left);
+        return rightRotate(t);
+    }
+
+    Node *rightRotate(Node *node)
+    {
+        Node *x = node->left;
+        node->left = x->right;
+        x->right = node;
+        node->height = (getBF(node) > 0 ? getHeight(node->left) : getHeight(node->right)) + 1;
+        if (getHeight(x->left) > node->height)
+        {
+            x->height = getHeight(x->left) + 1;
+        }
+        else
+        {
+            x->height = node->height + 1;
+        }
+        return x;
+    }
+
+    Node *insert(int key, Node *node)
+    {
+        if (node == nullptr)
+        {
+            node = new Node(key);
+        }
+        else if (key < node->key)
+        {
+            node->left = insert(key, node->left);
+            if (getBF(node) == 2)
             {
-                temp = findMin(t->right);
-                t->key = temp->key;
-                t->right = remove(t->key, t->right);
+                if (key < node->left->key)
+                    node = rightRotate(node);
+                else
+                    node = LRRotate(node);
             }
-            // With one or zero child
+        }
+        else if (key > node->key)
+        {
+            node->right = insert(key, node->right);
+            if (-getBF(node) == 2)
+            {
+                if (key > node->right->key)
+                    node = leftRotate(node);
+                else
+                    node = RLRotate(node);
+            }
+        }
+        node->height = (getBF(node) > 0 ? getHeight(node->left) : getHeight(node->right)) + 1;
+        return node;
+    }
+
+    Node *findSucc(Node *node)
+    {
+        if (node == nullptr)
+            return nullptr;
+        else if (node->left == nullptr)
+            return node;
+        else
+            return findSucc(node->left);
+    }
+
+    Node *remove(int key, Node *node)
+    {
+        Node *temp;
+        if (node == nullptr)
+            return nullptr;
+        else if (key < node->key)
+            node->left = remove(key, node->left);
+        else if (key > node->key)
+            node->right = remove(key, node->right);
+        else if (node->left && node->right)
+        {
+            temp = findSucc(node->right);
+            node->key = temp->key;
+            node->right = remove(node->key, node->right);
+        }
+        else
+        {
+            temp = node;
+            if (node->left == nullptr)
+                node = node->right;
+            else if (node->right == nullptr)
+                node = node->left;
+            delete temp;
+        }
+        if (node == nullptr)
+            return node;
+
+        node->height = (getHeight(node->left) > getHeight(node->right) ? getHeight(node->left) : getHeight(node->right)) + 1;
+        if (getHeight(node->left) - getHeight(node->right) == 2)
+        {
+            if (getHeight(node->left->left) - getHeight(node->left->right) == 1)
+            {
+
+                return rightRotate(node);
+            }
             else
             {
-                temp = t;
-                if(t->left == nullptr)
-                    t = t->right;
-                else if(t->right == nullptr)
-                    t = t->left;
-                delete temp;
-            }
-            if(t == nullptr)
-                return t;
-            
-            t->height = (getHeight(t->left)>getHeight(t->right) ? getHeight(t->left) : getHeight(t->right))+1;
-            // printBT();
-            // cout<<"t: "<<t->key<<endl;
-            // If node is unbalanced
-            // If left node is deleted, right case
-            if(getHeight(t->left) - getHeight(t->right) == 2)
-            {
-                // right right case
-                if(getHeight(t->left->left) - getHeight(t->left->right) == 1){
-                   
-                    return rightRotate(t);
-                }
-                // right left case
-                else{
 
-                    
-                    return LRRotate(t);
-                }
+                return LRRotate(node);
             }
-            // If right node is deleted, left case
-            else if(getHeight(t->right) - getHeight(t->left) == 2)
-            {
-                // left left case
-                if(getHeight(t->right->right) - getHeight(t->right->left) == 1){
-                    
-                    return leftRotate(t);
-
-                }
-                // left right case
-                else{
-                    
-                    return RLRotate(t);
-                }
-            }
-            return t;
         }
+        else if (getHeight(node->right) - getHeight(node->left) == 2)
+        {
+            if (getHeight(node->right->right) - getHeight(node->right->left) == 1)
+            {
 
+                return leftRotate(node);
+            }
+            else
+            {
 
-        Node* find(int key, Node* t){
-            if(t==nullptr) return nullptr;
-            if(t->key==key) return t;
+                return RLRotate(node);
+            }
+        }
+        return node;
+    }
 
-            auto lsearch = find(key,t->left);
-            auto rsearch = find(key,t->right);
-            if(lsearch!=nullptr) return lsearch;
-            if(rsearch!=nullptr) return rsearch;
+    Node *find(int key, Node *node)
+    {
+        if (node == nullptr)
             return nullptr;
-        }
+        if (node->key == key)
+            return node;
 
-    public:
-        AVLTree(){
-            root = nullptr;
-        }
-        ~AVLTree(){
-			destroyRecursive(root);
-		}
+        auto lsearch = find(key, node->left);
+        auto rsearch = find(key, node->right);
+        if (lsearch != nullptr)
+            return lsearch;
+        if (rsearch != nullptr)
+            return rsearch;
+        return nullptr;
+    }
 
-        void insert(int data){
-            root = insert(data,root);
-        }
-        
+public:
+    AVLTree()
+    {
+        root = nullptr;
+    }
+    ~AVLTree()
+    {
+        destroyRecursive(root);
+    }
 
-        Node* find(int key){
-            Node* currNode = root; 
-			while(currNode != nullptr){
-				if(key < currNode->key){
-					currNode = currNode->left;
-				}else if(key > currNode->key){
-					currNode = currNode->right;
-				}else{ //currNode->key == key
-					return currNode;
-				}
-			}
-			return currNode;
-        }
+    void insert(int data)
+    {
+        root = insert(data, root);
+    }
 
-        void remove(int key){
-            root = remove(key,root);
-        }
-        
-        void printBT(const std::string& prefix, Node* node, bool isLeft)
+    Node *find(int key)
+    {
+        Node *currNode = root;
+        while (currNode != nullptr)
         {
-            if( node != nullptr )
+            if (key < currNode->key)
             {
-                std::cout << prefix;
-
-                std::cout << (isLeft ? "├──" : "└──" );
-
-                // print the value of the node
-                std::cout << node->key<<"::"<<node->height << std::endl;
-                // std::cout << getBF(node) << std::endl;
-
-                // enter the next tree level - left and right branch
-                printBT( prefix + (isLeft ? "│   " : "    "), node->left, true);
-                printBT( prefix + (isLeft ? "│   " : "    "), node->right, false);
+                currNode = currNode->left;
+            }
+            else if (key > currNode->key)
+            {
+                currNode = currNode->right;
+            }
+            else
+            {
+                return currNode;
             }
         }
+        return currNode;
+    }
 
-        void printBT()
+    void remove(int key)
+    {
+        root = remove(key, root);
+    }
+
+    /* This function is borrowed from the internet just for debug printing of the tree */
+    void printBT(const std::string &prefix, Node *node, bool isLeft)
+    {
+        if (node != nullptr)
         {
-            printBT("", root, false);    
-        }
-		
-		
-};
+            std::cout << prefix;
 
+            std::cout << (isLeft ? "├──" : "└──");
+
+            std::cout << node->key << "::" << node->height << std::endl;
+
+            printBT(prefix + (isLeft ? "│   " : "    "), node->left, true);
+            printBT(prefix + (isLeft ? "│   " : "    "), node->right, false);
+        }
+    }
+
+    void printBT()
+    {
+        printBT("", root, false);
+    }
+};
 
 #endif
