@@ -219,14 +219,14 @@ int main(int argc, char* argv[]){
     printTest(FindDeleteTest,20000,"Insert 20000 items then delete (random):",false);
     printTest(FindDeleteTest,20000,"Insert 20000 items then delete (ordered):",true);
     
-    printTest(InsertTest,500000,"Insert 500000 items (random):",false);
-    printTest(InsertTest,500000,"Insert 500000 items (ordered):",true);
-    printTest(FindTest,500000,"Insert 500000 items then find (random):",false);
-    printTest(FindTest,500000,"Insert 500000 items then find (ordered):",true);
-    printTest(DeleteTest,500000,"Insert 500000 items then delete (random):",false);
-    printTest(DeleteTest,500000,"Insert 500000 items then delete (ordered):",true);
-    printTest(FindDeleteTest,500000,"Insert 500000 items then delete (random):",false);
-    printTest(FindDeleteTest,500000,"Insert 500000 items then delete (ordered):",true);
+    printTest(InsertTest,50000,"Insert 50000 items (random):",false);
+    printTest(InsertTest,50000,"Insert 50000 items (ordered):",true);
+    printTest(FindTest,50000,"Insert 50000 items then find (random):",false);
+    printTest(FindTest,50000,"Insert 50000 items then find (ordered):",true);
+    printTest(DeleteTest,50000,"Insert 50000 items then delete (random):",false);
+    printTest(DeleteTest,50000,"Insert 50000 items then delete (ordered):",true);
+    printTest(FindDeleteTest,50000,"Insert 50000 items then delete (random):",false);
+    printTest(FindDeleteTest,50000,"Insert 50000 items then delete (ordered):",true);
     
 
     
