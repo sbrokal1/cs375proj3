@@ -6,6 +6,8 @@
 #include <algorithm>
 #include "BST.h"
 #include "AVLTree.h"
+#include <map>
+#include <fstream>
 
 using namespace std::chrono;
 
@@ -121,6 +123,61 @@ vector<int> getUniques(vector<int> vec)
     return uniques;
 }
 
+extern void InsertTest(SearchTree* tree, vector<int> nums);
+
+void genGraphFile(void (*tester)(SearchTree*, vector<int>), string output, int (*numGen)(int prevNum), int limit, bool insertFirst = false){
+    ofstream file(output);
+
+    vector<int> nums;
+
+    int lastNum = numGen(0);
+    nums.push_back(lastNum);
+
+    for(int n = 1; n<limit;){
+        
+        SearchTree* bst = new BST();
+        SearchTree* avl = new AVLTree();
+
+        if(insertFirst){
+            InsertTest(bst,nums);
+            InsertTest(avl,nums);
+        }
+
+        auto BSTstart = high_resolution_clock::now();
+        tester(bst,nums);
+        auto BSTstop = high_resolution_clock::now();
+        auto BSTduration = duration_cast<microseconds>(BSTstop - BSTstart).count();
+
+        auto AVLstart = high_resolution_clock::now();
+        tester(avl,nums);
+        auto AVLstop = high_resolution_clock::now();
+        auto AVLduration = duration_cast<microseconds>(AVLstop - AVLstart).count();
+
+        file<<"BST "<<n<<" "<<BSTduration<<endl;   
+        file<<"AVL "<<n<<" "<<AVLduration<<endl;  
+
+        for(int i = 0; i<(limit/100); i++){
+            auto thisNum = numGen(lastNum);
+            nums.push_back(thisNum);
+            lastNum = numGen(thisNum);
+            n+=1;
+        } 
+        if(n>limit){
+            for(int i = 0; i<nums.size()-(limit/100); i++){
+                if(bst->find(nums.at(i))==nullptr){
+                    cout<<"BST BAD"<<endl;
+                }
+                if(avl->find(nums.at(i))==nullptr){
+                    cout<<"AVL BAD"<<endl;
+                }
+            }
+        }
+        // ((AVLTree*)(avl))->printBT();
+    }
+
+    
+    file.close();
+}
 
 void printTest(void (*tester)(SearchTree*, vector<int>), int n, string testname, bool ordered){
     // Generate numbers
@@ -155,81 +212,39 @@ void InsertTest(SearchTree* tree, vector<int> nums){
     }
 }
 void DeleteTest(SearchTree* tree, vector<int> nums){
-    int i = 0;
-    for(auto num : nums){
-        tree->insert(num);
-        if(i%10==7){
-            tree->remove(nums.at(i-3));
-        }
-        i++;
+    int deleteCount = 0;
+    map<int,bool> deleted;
+
+    while(deleteCount<nums.size()/4){
+        int i = rand()%nums.size();
+        if(deleted.find(i)!=deleted.end()) continue;
+        tree->remove(i);
+        deleted.emplace(i,true);
+        deleteCount++;
     }
 }
 void FindTest(SearchTree* tree, vector<int> nums){
-    int i = 0;
     for(auto num : nums){
-        tree->insert(num);
-        if(i%10==7){
-            tree->find(nums.at(i-3));
-        }
-        i++;
+        tree->find(num);
     }
 }
-void FindDeleteTest(SearchTree* tree, vector<int> nums){
-    int i = 0;
-    for(auto num : nums){
-        tree->insert(num);
-        if(i%10==7){
-            tree->find(nums.at(i-3));
-        }
-        if(i%13==7){
-            tree->find(nums.at(i-4));
-        }
-        i++;
-    }
+
+int randomGen(int prev){
+    return rand();
+}
+int orderedGen(int prev){
+    return prev+10;
 }
 
 int main(int argc, char* argv[]){
-    srand(time(0));//1670036600
-    // cout<<"seed "<<seed<<endl;
-
-    printTest(InsertTest,5000,"Insert 5000 items (random):",false);
-    printTest(InsertTest,5000,"Insert 5000 items (ordered):",true);
-    printTest(FindTest,5000,"Insert 5000 items then find (random):",false);
-    printTest(FindTest,5000,"Insert 5000 items then find (ordered):",true);
-    printTest(DeleteTest,5000,"Insert 5000 items then delete (random):",false);
-    printTest(DeleteTest,5000,"Insert 5000 items then delete (ordered):",true);
-    printTest(FindDeleteTest,5000,"Insert 5000 items then delete (random):",false);
-    printTest(FindDeleteTest,5000,"Insert 5000 items then delete (ordered):",true);
+    srand(time(0));
     
-    printTest(InsertTest,10000,"Insert 10000 items (random):",false);
-    printTest(InsertTest,10000,"Insert 10000 items (ordered):",true);
-    printTest(FindTest,10000,"Insert 10000 items then find (random):",false);
-    printTest(FindTest,10000,"Insert 10000 items then find (ordered):",true);
-    printTest(DeleteTest,10000,"Insert 10000 items then delete (random):",false);
-    printTest(DeleteTest,10000,"Insert 10000 items then delete (ordered):",true);
-    printTest(FindDeleteTest,10000,"Insert 10000 items then delete (random):",false);
-    printTest(FindDeleteTest,10000,"Insert 10000 items then delete (ordered):",true);
-    
-    printTest(InsertTest,20000,"Insert 20000 items (random):",false);
-    printTest(InsertTest,20000,"Insert 20000 items (ordered):",true);
-    printTest(FindTest,20000,"Insert 20000 items then find (random):",false);
-    printTest(FindTest,20000,"Insert 20000 items then find (ordered):",true);
-    printTest(DeleteTest,20000,"Insert 20000 items then delete (random):",false);
-    printTest(DeleteTest,20000,"Insert 20000 items then delete (ordered):",true);
-    printTest(FindDeleteTest,20000,"Insert 20000 items then delete (random):",false);
-    printTest(FindDeleteTest,20000,"Insert 20000 items then delete (ordered):",true);
-    
-    printTest(InsertTest,50000,"Insert 50000 items (random):",false);
-    printTest(InsertTest,50000,"Insert 50000 items (ordered):",true);
-    printTest(FindTest,50000,"Insert 50000 items then find (random):",false);
-    printTest(FindTest,50000,"Insert 50000 items then find (ordered):",true);
-    printTest(DeleteTest,50000,"Insert 50000 items then delete (random):",false);
-    printTest(DeleteTest,50000,"Insert 50000 items then delete (ordered):",true);
-    printTest(FindDeleteTest,50000,"Insert 50000 items then delete (random):",false);
-    printTest(FindDeleteTest,50000,"Insert 50000 items then delete (ordered):",true);
-    
-
-    
+    genGraphFile(InsertTest,"insert_ordered.txt",orderedGen,15000);
+    genGraphFile(InsertTest,"insert_random.txt",randomGen,1000000);
+    genGraphFile(DeleteTest,"delete_random.txt",randomGen,100000, true);
+    genGraphFile(DeleteTest,"delete_ordered.txt",orderedGen,20000, true);
+    genGraphFile(FindTest,"find_ordered.txt",orderedGen,10000, true);
+    genGraphFile(FindTest,"find_random.txt",randomGen,50000, true);
 
     return 0;
 }
